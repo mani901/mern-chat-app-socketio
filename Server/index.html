@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Real-Time Counter</title>
+</head>
+<body>
+  <h1>Counter: <span id="counter">0</span></h1>
+  <button id="incrementBtn">Increment</button>
+<button id="decrementBtn">decrement</button>
+<button id="resetBtn">reset</button>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    const counterEl = document.getElementById('counter');
+    const incrementBtn = document.getElementById('incrementBtn');
+
+    // Listen for count updates from server
+    socket.on('updateCount', (count) => {
+      counterEl.textContent = count;
+    });
+
+    // Send increment event to server
+    incrementBtn.addEventListener('click', () => {
+      socket.emit('increment');
+    });
+
+     decrementBtn.addEventListener('click', () => {
+      socket.emit('decrement');
+    });
+
+     resetBtn.addEventListener('click', () => {
+      socket.emit('reset');
+    });
+    
+  </script>
+</body>
+</html>
