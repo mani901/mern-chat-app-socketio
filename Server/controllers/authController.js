@@ -60,16 +60,38 @@ export const googleAuth = passport.authenticate('google', {
 });
 
 export const googleCallback = (req, res, next) => {
+  console.log('Google callback route accessed');
+  console.log('Query params:', req.query);
+  console.log('URL:', req.url);
+  
   passport.authenticate('google', { session: false }, (err, user) => {
-    if (err) return res.status(500).json({ error: err.message });
-    if (!user) return res.redirect('/login');
+    console.log('Passport authenticate callback:', { err: err?.message, user: user?.email });
+    
+    if (err) {
+      console.log('Google auth error:', err.message);
+      // Redirect to frontend with error
+      return res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/login?error=${encodeURIComponent(err.message)}`);
+    }
+    if (!user) {
+      console.log('No user returned from Google auth');
+      return res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/login?error=${encodeURIComponent('Google authentication failed')}`);
+    }
     
     // Generate token
     const token = generateToken(user);
+    console.log('Generated token for user:', user.email);
     
-    // Redirect to frontend with token in query or send it in response
-    // For example, redirect to: http://localhost:3000/profile?token=...
-    res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3000'}/profile?token=${token}`);
+    // Redirect to frontend with success data
+    const userData = encodeURIComponent(JSON.stringify({
+      id: user._id,
+      username: user.username,
+      email: user.email,
+      displayName: user.displayName
+    }));
+    
+    const redirectUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/google-callback?token=${token}&user=${userData}`;
+    console.log('Redirecting to:', redirectUrl);
+    res.redirect(redirectUrl);
   })(req, res, next);
 };
 

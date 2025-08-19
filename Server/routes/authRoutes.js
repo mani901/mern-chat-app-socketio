@@ -4,6 +4,12 @@ import { verifyToken } from '../middleware/authMiddleware.js';
 
 const authRoutes = Router();
 
+// Debug middleware to log all requests
+authRoutes.use((req, res, next) => {
+  console.log(`Auth route accessed: ${req.method} ${req.path}`);
+  next();
+});
+
 // Local auth routes
 authRoutes.post('/register', register);
 authRoutes.post('/login', login);
