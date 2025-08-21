@@ -15,12 +15,17 @@ export const useAuthStore = create((set) => ({
       isLoggedIn: true,
     }),
 
-  logout: () =>
+  logout: () => {
+    // clear localStorage
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+
     set({
       user: null,
       token: null,
       isLoggedIn: false,
-    }),
+    });
+  },
 
 
   initializeAuth: (userData, jwtToken) => {

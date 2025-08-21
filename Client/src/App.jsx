@@ -7,6 +7,8 @@ import { useAuthStore } from "@/store/useAuthStore";
 import PrivateRoute from "@/components/common/PrivateRoute";
 import PublicRoute from "@/components/common/PublicRoute";
 import { useEffect } from "react";
+import ChatSideBar from "@/components/chat/ChatSideBar";
+import Home from "./pages/chat/Home";
 
 function App() {
   const { initializeAuth } = useAuthStore();
@@ -33,6 +35,16 @@ function App() {
             </PublicRoute>
           }
         />
+
+        <Route
+          path="/chat"
+          element={
+            <PublicRoute>
+              <Home />
+            </PublicRoute>
+          }
+        />
+
         {/* Signup page */}
         <Route
           path="/signup"

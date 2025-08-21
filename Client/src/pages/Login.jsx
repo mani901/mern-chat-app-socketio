@@ -3,7 +3,6 @@ import { Link, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
 import {
   Card,
   CardContent,
@@ -15,7 +14,6 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Github, Mail, Lock, User } from "lucide-react";
 import { useLogin } from "@/hooks/useLogin";
-
 export default function LoginPage() {
   const [searchParams] = useSearchParams();
   const [formData, setFormData] = useState({
@@ -23,9 +21,7 @@ export default function LoginPage() {
     password: "",
   });
   const [urlError, setUrlError] = useState("");
-
   const { mutate: loginAPI, isPending, error } = useLogin();
-
   // Check for error messages in URL params (from Google auth)
   useEffect(() => {
     const errorParam = searchParams.get("error");
@@ -33,7 +29,6 @@ export default function LoginPage() {
       setUrlError(decodeURIComponent(errorParam));
     }
   }, [searchParams]);
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -41,12 +36,10 @@ export default function LoginPage() {
       [name]: value,
     }));
   };
-
   const handleLogin = (e) => {
     e.preventDefault();
     loginAPI(formData);
   };
-
   const handleGoogleLogin = () => {
     // Open Google OAuth in a new window
     window.open(
@@ -55,13 +48,11 @@ export default function LoginPage() {
       "width=500,height=600,scrollbars=yes,resizable=yes"
     );
   };
-
   const getErrorMessage = () => {
     if (urlError) return urlError;
     if (!error) return null;
     return error.response?.data?.message || error.message || "Login failed";
   };
-
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
       <Card className="w-full max-w-md">
@@ -73,7 +64,6 @@ export default function LoginPage() {
             Enter your credentials to access your account
           </CardDescription>
         </CardHeader>
-
         <CardContent>
           {/* Error Message Display */}
           {getErrorMessage() && (
@@ -81,7 +71,6 @@ export default function LoginPage() {
               {getErrorMessage()}
             </div>
           )}
-
           <form onSubmit={handleLogin} className="space-y-4">
             {/* Username or Email */}
             <div className="space-y-2">
@@ -102,7 +91,6 @@ export default function LoginPage() {
                 />
               </div>
             </div>
-
             {/* Password */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
@@ -129,12 +117,10 @@ export default function LoginPage() {
                 />
               </div>
             </div>
-
             <Button type="submit" className="w-full" disabled={isPending}>
               {isPending ? "Signing in..." : "Sign In"}
             </Button>
           </form>
-
           {/* Divider */}
           <div className="relative my-4">
             <div className="absolute inset-0 flex items-center">
@@ -146,7 +132,6 @@ export default function LoginPage() {
               </span>
             </div>
           </div>
-
           {/* Google Login */}
           <Button
             variant="outline"
@@ -175,7 +160,6 @@ export default function LoginPage() {
             Sign in with Google
           </Button>
         </CardContent>
-
         <CardFooter className="flex flex-col">
           <p className="text-sm text-center text-muted-foreground">
             Don&apos;t have an account?{" "}
