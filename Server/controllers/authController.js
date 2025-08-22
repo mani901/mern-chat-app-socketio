@@ -95,6 +95,16 @@ export const googleCallback = (req, res, next) => {
   })(req, res, next);
 };
 
+export const getUsers = async (req, res) => {
+  try {
+    const users = await User.find({_id:{$ne:req.user._id}});
+    res.status(200).json(users);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
 export const logout = (req, res) => {
   // With JWT, logout is typically handled client-side by discarding the token
   res.json({ message: 'Logout successful' });

@@ -5,12 +5,11 @@ import express from 'express';
 import cors from 'cors';
 import { Server } from 'socket.io';
 import authRoutes from './routes/authRoutes.js';
-import configureSocket from './utils/socket.js';
 import cookieParser from 'cookie-parser';
 import connectDB from './config/db.js';
 import passport from './config/passport.js';
-
-
+import messageRoutes from './routes/messageRoutes.js';
+import { configureSocket } from './socket/socket.js';
 import errorHandler from './middleware/errorMiddelware.js';
 
 const app = express();
@@ -41,7 +40,7 @@ app.use(passport.initialize());
 
 // Routes
 app.use('/api/auth', authRoutes);
-
+app.use('/api/messages', messageRoutes);
 
 
 configureSocket(io);

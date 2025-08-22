@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { register, login, googleAuth, googleCallback, profile, logout } from '../controllers/authController.js';
+import { register, login, googleAuth, googleCallback, profile, logout, getUsers } from '../controllers/authController.js';
 import { verifyToken } from '../middleware/authMiddleware.js';
 
 const authRoutes = Router();
@@ -20,6 +20,7 @@ authRoutes.get('/google/callback', googleCallback);
 
 // Protected route
 authRoutes.get('/profile', verifyToken, profile);
+authRoutes.get('/users', getUsers);
 
 // Logout
 authRoutes.post('/logout', logout);
