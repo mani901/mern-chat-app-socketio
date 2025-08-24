@@ -1,8 +1,44 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, LogOut } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useAuthStore } from "@/store/useAuthStore";
+import { useChatStore, useChatSelectors } from "@/store/useChatStore";
+import socketService from "@/services/socket";
+import { toast } from "react-hot-toast";
 
 const ChatHeader = ({ selectedChat, onBackClick, showBackButton }) => {
+  // Auth store for logout functionality
+  const { logout } = useAuthStore();
+  
+  // Chat store for online status
+  const { isUserOnline } = useChatSelectors();
+  
+  // Navigation hook for redirect
+  const navigate = useNavigate();
+
+  // Handle logout functionality
+  const handleLogout = () => {
+    try {
+      // Disconnect socket before logging out
+      socketService.disconnect();
+      
+      // Clear chat store
+      const { cleanup } = useChatStore.getState();
+      cleanup();
+      
+      // Logout from auth store
+      logout();
+      
+      // Redirect to login page
+      navigate('/login');
+      
+      toast.success("Logged out successfully!");
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast.error("Error during logout");
+    }
+  };
   // Default chat info if no chat is selected
   const defaultChat = {
     name: "Select a chat",
@@ -12,9 +48,9 @@ const ChatHeader = ({ selectedChat, onBackClick, showBackButton }) => {
 
   const chatInfo = selectedChat
     ? {
-        name: selectedChat.name,
+        name: selectedChat.name || selectedChat.username,
         avatar: selectedChat.avatar,
-        isOnline: selectedChat.unread || Math.random() > 0.5, // Simulate online status
+        isOnline: isUserOnline(selectedChat.partnerId || selectedChat.id),
       }
     : defaultChat;
 
@@ -53,6 +89,17 @@ const ChatHeader = ({ selectedChat, onBackClick, showBackButton }) => {
           </span>
         </div>
       </div>
+      
+      {/* Logout Button */}
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={handleLogout}
+        className="p-2 hover:bg-red-50 hover:text-red-600 transition-colors ml-3"
+        title="Logout"
+      >
+        <LogOut className="h-4 w-4" />
+      </Button>
     </div>
   );
 };

@@ -5,7 +5,7 @@ import User from '../models/userModel.js';
 
 export const getChatList = async (req, res) => {
   try {
-    const userId = mongoose.Types.ObjectId(req.user._id); // Ensure ObjectId type
+    const userId = new mongoose.Types.ObjectId(req.user._id); // Ensure ObjectId type
     const chatList = await Message.aggregate([
       // Match messages involving the user (as sender or receiver)
       {
@@ -36,7 +36,7 @@ export const getChatList = async (req, res) => {
       // Lookup user details for partner
       {
         $lookup: {
-          from: 'User', // Verify collection name (lowercase, as Mongoose pluralizes)
+          from: 'users', // Correct collection name (mongoose pluralizes and lowercases)
           localField: '_id',
           foreignField: '_id',
           as: 'partner',
@@ -78,6 +78,12 @@ export const getChatList = async (req, res) => {
           partnerUsername: {
             $ifNull: ['$partner.username', 'Unknown User'], // Fallback for deleted users
           },
+          partnerEmail: {
+            $ifNull: ['$partner.email', 'unknown@example.com'],
+          },
+          isOnline: {
+            $ifNull: ['$partner.isOnline', false],
+          },
           lastMessage: 1,
           lastMessageTimestamp: 1,
           lastMessageSender: 1,
@@ -106,6 +112,7 @@ export const getMessages = async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(userId)) {
       return res.status(400).json({ message: 'Invalid user ID' });
     }
+
     const messages = await Message.find({
       $or: [
         { sender: req.user._id, receiver: userId },
@@ -113,7 +120,18 @@ export const getMessages = async (req, res) => {
       ],
     })
       .sort({ timestamp: 1 })
-      .populate('sender receiver', 'username');
+      .populate('sender receiver', 'username email');
+
+    // Mark messages as read when fetched
+    await Message.updateMany(
+      {
+        sender: userId,
+        receiver: req.user._id,
+        read: false
+      },
+      { read: true }
+    );
+
     res.status(200).json(messages);
   } catch (error) {
     console.error('Error fetching messages:', error.message);
