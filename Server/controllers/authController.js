@@ -14,6 +14,11 @@ const generateToken = (user) => {
 export const register = async (req, res) => {
   try {
     const { username, email, password } = req.body;
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      console.log('User already exists' , existingUser);
+      return res.status(400).json({ message: 'User already exists' });
+    }
     const user = new User({ username, email, password });
     await user.save();
     
@@ -96,9 +101,11 @@ export const googleCallback = (req, res, next) => {
 };
 
 export const getUsers = async (req, res) => {
+
   try {
     const users = await User.find({_id:{$ne:req.user._id}});
     res.status(200).json(users);
+    console.log(users);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

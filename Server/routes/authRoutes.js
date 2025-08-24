@@ -20,7 +20,7 @@ authRoutes.get('/google/callback', googleCallback);
 
 // Protected route
 authRoutes.get('/profile', verifyToken, profile);
-authRoutes.get('/users', getUsers);
+authRoutes.get('/users', verifyToken, getUsers);
 
 // Logout
 authRoutes.post('/logout', logout);

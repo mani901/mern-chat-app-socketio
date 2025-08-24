@@ -20,15 +20,7 @@ export function useLogin() {
 
       // Update Zustand
       useAuthStore.getState().setAuth(user, token);
-    
     },
 
-    onError: (error) => {
-      // Extract the actual error message from the server response
-      const errorMessage = error.response?.data?.message || error.message;
-      console.log('Login error:', errorMessage);
-      
-  
-    },
   });
 }

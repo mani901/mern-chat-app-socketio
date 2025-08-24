@@ -6,12 +6,15 @@ import { Routes, Route } from "react-router-dom";
 import { useAuthStore } from "@/store/useAuthStore";
 import PrivateRoute from "@/components/common/PrivateRoute";
 import PublicRoute from "@/components/common/PublicRoute";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import ChatSideBar from "@/components/chat/ChatSideBar";
 import Home from "./pages/chat/Home";
+import { Toaster } from "react-hot-toast";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
 
 function App() {
   const { initializeAuth } = useAuthStore();
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -20,12 +23,27 @@ function App() {
       try {
         const user = JSON.parse(userString);
         initializeAuth(user, token);
-      } catch {}
+      } catch (error) {
+        console.error("Failed to parse user data from localStorage:", error);
+        // Clear corrupted data
+        localStorage.removeItem("token");
+        localStorage.removeItem("auth-user");
+      }
     }
+    setIsLoading(false);
   }, [initializeAuth]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <LoadingSpinner size="large" text="Initializing application..." />
+      </div>
+    );
+  }
 
   return (
     <div>
+      <Toaster />
       <Routes>
         <Route
           path="/login"
@@ -39,9 +57,9 @@ function App() {
         <Route
           path="/chat"
           element={
-            <PublicRoute>
+            <PrivateRoute>
               <Home />
-            </PublicRoute>
+            </PrivateRoute>
           }
         />
 
@@ -63,7 +81,7 @@ function App() {
           path="/"
           element={
             <PrivateRoute>
-              <Dashboard />
+              <Home />
             </PrivateRoute>
           }
         />

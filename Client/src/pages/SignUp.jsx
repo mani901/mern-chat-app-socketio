@@ -12,32 +12,36 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Mail, Lock, User } from "lucide-react";
+import { useRegister } from "@/hooks/useRegister";
+import { toast } from "react-hot-toast";
 
 export default function SignupPage() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    username: "",
+    email: "",
+    password: "",
+  });
+  const {
+    mutate: registerAPI,
+    isPending,
+    error: registerError,
+  } = useRegister();
   const [error, setError] = useState("");
 
   const validateForm = () => {
-    if (!name.trim()) {
-      setError("Name is required");
+    if (!formData.username.trim()) {
+      setError("Username is required");
       return false;
     }
-    if (!email.trim()) {
+    if (!formData.email.trim()) {
       setError("Email is required");
       return false;
     }
-    if (!password) {
+    if (!formData.password) {
       setError("Password is required");
       return false;
     }
 
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters");
-      return false;
-    }
     setError("");
     return true;
   };
@@ -47,13 +51,19 @@ export default function SignupPage() {
 
     if (!validateForm()) return;
 
-    setIsLoading(true);
-
-    // Simulate API call
-    setTimeout(() => {
-      console.log("Signup attempt:", { name, email, password });
-      setIsLoading(false);
-    }, 1500);
+    registerAPI(formData, {
+      onError: (error) => {
+        const errorMessage =
+          error.response?.data?.message ||
+          error.message ||
+          "Registration failed";
+        toast.error(errorMessage);
+        setError(errorMessage);
+      },
+      onSuccess: () => {
+        setError("");
+      },
+    });
   };
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
@@ -84,8 +94,10 @@ export default function SignupPage() {
                   id="name"
                   type="text"
                   placeholder="John Doe"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  value={formData.username}
+                  onChange={(e) =>
+                    setFormData({ ...formData, username: e.target.value })
+                  }
                   className="pl-10"
                   required
                 />
@@ -102,8 +114,10 @@ export default function SignupPage() {
                   id="email"
                   type="email"
                   placeholder="name@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  value={formData.email}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
                   className="pl-10"
                   required
                 />
@@ -119,16 +133,18 @@ export default function SignupPage() {
                 <Input
                   id="password"
                   type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  value={formData.password}
+                  onChange={(e) =>
+                    setFormData({ ...formData, password: e.target.value })
+                  }
                   className="pl-10"
                   required
                 />
               </div>
             </div>
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Creating account..." : "Sign Up"}
+            <Button type="submit" className="w-full" disabled={isPending}>
+              {isPending ? "Creating account..." : "Sign Up"}
             </Button>
           </form>
         </CardContent>
